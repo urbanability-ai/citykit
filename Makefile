@@ -2,12 +2,13 @@ SHELL := /usr/bin/env bash
 RUN_ID ?= $(shell date -u +"%Y-%m-%dT%H%M%SZ")
 ART_DIR := artifacts/$(RUN_ID)
 
-.PHONY: help demo smoke clean
+.PHONY: help demo smoke inspect clean
 
 help:
 	@echo "Targets:"
 	@echo " make demo RUN_ID=... # build a city demo kit zip into artifacts/<run_id>/"
 	@echo " make smoke # quick sanity checks"
+	@echo " make inspect # inspect the latest demo kit"
 	@echo " make clean # remove artifacts"
 
 smoke:
@@ -18,6 +19,9 @@ smoke:
 demo:
 	@mkdir -p "$(ART_DIR)"
 	@RUN_ID="$(RUN_ID)" ./scripts/demo.sh
+
+inspect:
+	@./scripts/inspect_latest.sh
 
 clean:
 	rm -rf artifacts/*

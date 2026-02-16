@@ -20,4 +20,8 @@ No hype. Only artifacts.
 - Deployment plans + KPIs
 - Operations playbooks
 
+**Prerequisites:**
+- Python 3
+- (optional) ffmpeg for video placeholders
+
 **How to start:** See [REPRODUCE.md](./REPRODUCE.md)

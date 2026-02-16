@@ -7,11 +7,10 @@ Goal: produce `city_demo_kit.zip` from a clean machine.
 ### 1) Install prerequisites (minimal)
 
 ```bash
-# Core requirements
+# Core requirement
 python3
-zip
 
-# Optional (for hero mode)
+# Optional (for placeholder videos)
 ffmpeg
 ```
 

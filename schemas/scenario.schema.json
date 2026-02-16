@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/openclaw-city-demo-kit/schemas/scenario.schema.json",
+  "title": "Scenario",
+  "type": "object",
+  "required": ["schema_version", "run_id", "zone", "cameras", "truth_vs_appearance"],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "run_id": {
+      "type": "string"
+    },
+    "zone": {
+      "type": "object",
+      "required": ["source", "map_artifact"],
+      "properties": {
+        "source": {
+          "type": "string"
+        },
+        "map_artifact": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "cameras": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "type"],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "truth_vs_appearance": {
+      "type": "object",
+      "required": ["truth_layer", "appearance_layer"],
+      "properties": {
+        "truth_layer": {
+          "type": "string"
+        },
+        "appearance_layer": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}
