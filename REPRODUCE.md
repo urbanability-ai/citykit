@@ -4,43 +4,26 @@ Goal: produce `city_demo_kit.zip` from a clean machine.
 
 ## Quickstart (v0.1)
 
-### 1) Install prerequisites (minimal)
+### Prereqs
 
-```bash
-# Core requirement
-python3
+**Required:**
+- `python3`
+- `zip` (CLI)
 
-# Optional (for placeholder videos)
-ffmpeg
-```
+**Optional:**
+- `ffmpeg` (only used to generate placeholder `.mp4` files; otherwise the demo writes placeholder `.txt` files)
 
-### 2) Run
+### Run
 
 ```bash
 make demo
 ```
 
-### 3) Output
+### Output
 
-```
-artifacts/<run_id>/city_demo_kit.zip
-```
+* `artifacts/<run_id>/city_demo_kit.zip`
 
-The zip contains:
-- `scenario.json` — full scenario spec
-- `dataset_manifest.json` — dataset provenance + schema
-- `kpi_report.md` — metrics and outcomes
-- `renders/*.mp4` — multi-view video
-- `depth/` + `seg/` — raw geometry layers
-- `pcd_groundtruth/` — point cloud truth data
-- `REPRODUCE.md` — how to rebuild this exact pack
+### Notes
 
----
-
-## What's Inside
-
-Each `city_demo_kit.zip` is self-documenting and reproducible from its manifest.
-
-No external API calls. No credentials required.
-
-**Every artifact is independently verifiable.**
+* v0.1 is intentionally minimal and may include placeholders.
+* We explicitly separate **truth** (simulator depth/LiDAR, planned) from **appearance** (videos for demos).

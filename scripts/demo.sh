@@ -112,25 +112,11 @@ else
   echo "birds_eye placeholder (install ffmpeg for mp4)" > "${KIT_DIR}/multiview/birds_eye.mp4.txt"
 fi
 
-# 5) Package zip (using Python, no external dependency)
-python3 - <<ZIPPY
-import zipfile
-import os
-from pathlib import Path
+# 5) Package zip (using CLI zip)
+(
+  cd "${OUT_DIR}"
+  rm -f "${ZIP_PATH}"
+  zip -qr "city_demo_kit.zip" "city_demo_kit"
+)
 
-kit_dir = "${KIT_DIR}"
-zip_path = "${ZIP_PATH}"
-out_dir = "${OUT_DIR}"
-
-if os.path.exists(zip_path):
-  os.remove(zip_path)
-
-with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zf:
-  for root, dirs, files in os.walk(kit_dir):
-    for file in files:
-      file_path = os.path.join(root, file)
-      arcname = os.path.relpath(file_path, out_dir)
-      zf.write(file_path, arcname)
-
-print(f"✅ Built: {zip_path}")
-ZIPPY
+echo "✅ Built: ${ZIP_PATH}"

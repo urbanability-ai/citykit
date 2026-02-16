@@ -22,6 +22,7 @@ No hype. Only artifacts.
 
 **Prerequisites:**
 - Python 3
+- `zip` (CLI)
 - (optional) ffmpeg for video placeholders
 
 **How to start:** See [REPRODUCE.md](./REPRODUCE.md)

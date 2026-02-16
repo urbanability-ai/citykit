@@ -13,7 +13,8 @@ help:
 
 smoke:
 	@command -v python3 >/dev/null || (echo "Missing python3" && exit 1)
-	@echo "OK: python3 present (using Python zipfile, no external zip needed)"
+	@command -v zip >/dev/null || (echo "Missing zip (apt-get install zip)" && exit 1)
+	@echo "OK: python3 + zip present"
 	@echo "Optional: ffmpeg for placeholder mp4"
 
 demo:
