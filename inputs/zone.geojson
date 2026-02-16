@@ -1,0 +1,23 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Demo Intersection Polygon"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [13.404954, 52.520008],
+            [13.406000, 52.520008],
+            [13.406000, 52.521050],
+            [13.404954, 52.521050],
+            [13.404954, 52.520008]
+          ]
+        ]
+      }
+    }
+  ]
+}

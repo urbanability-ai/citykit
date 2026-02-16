@@ -1,36 +1,14 @@
-# Environment
+# secrets
 .env
-.env.local
 
-# Artifacts and output
+# generated outputs
 artifacts/
-*.zip
-*.tar.gz
+data/
 
-# Media
+# archives
+*.zip
+
+# keep repo light by default (adjust later if needed)
 *.mp4
 *.mov
-*.avi
-*.webm
-
-# OS
 .DS_Store
-Thumbs.db
-
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-.venv/
-venv/
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# Temporary
-*.tmp
-.cache/
