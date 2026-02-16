@@ -1,0 +1,36 @@
+# Environment
+.env
+.env.local
+
+# Artifacts and output
+artifacts/
+*.zip
+*.tar.gz
+
+# Media
+*.mp4
+*.mov
+*.avi
+*.webm
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary
+*.tmp
+.cache/
