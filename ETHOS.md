@@ -1,6 +1,6 @@
 # ETHOS — City Ops & Synthetic Scenario Factory
 
-> Inspired by the work of @steinpete
+> Inspired by the work of @steipete
 
 > **Vienna Rule:** If it can't be reproduced from a clean machine, it didn't happen.
 >
