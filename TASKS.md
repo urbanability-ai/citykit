@@ -4,7 +4,9 @@ Task index for the City Demo Kit project.
 
 ---
 
-## Robot Operations
+## Service Operations (Automated + Assisted)
+
+These tasks are framed around **city services for people**: safer streets, clearer curbside rules, and reliable delivery and mobility — including the shift toward aging-in-place and higher demand for at-home services.
 
 ### Task: Autonomous Delivery Route (Urban Grid)
 

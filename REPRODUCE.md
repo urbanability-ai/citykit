@@ -21,9 +21,9 @@ make demo
 
 ### Output
 
-* `artifacts/<run_id>/city_demo_kit.zip`
+- `artifacts/<run_id>/city_demo_kit.zip`
 
 ### Notes
 
-* v0.1 is intentionally minimal and may include placeholders.
-* We explicitly separate **truth** (simulator depth/LiDAR, planned) from **appearance** (videos for demos).
+- v0.1 is intentionally minimal and may include placeholders.
+- We explicitly separate **truth** (simulator depth/LiDAR, planned) from **appearance** (videos for demos).

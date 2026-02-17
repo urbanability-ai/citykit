@@ -20,7 +20,7 @@ These will be created as GitHub issues later. Keeping them here first keeps scop
 
 **Impact:**
 - Makes the demo map realistic without heavyweight tooling
-- Encourages users to define their own zones
+- Encourages people to define and test their own zones
 
 ---
 
@@ -107,7 +107,6 @@ These will be created as GitHub issues later. Keeping them here first keeps scop
 ## Notes for Triaging Later
 
 When converting these to GitHub issues:
-
 - Label: `good-first-issue`, `help-wanted`, or `core-loop`
 - Assign milestones to weeks (e.g., issue #3 → Week 3 plan)
 - Add "acceptance criteria" as a checklist in the issue body

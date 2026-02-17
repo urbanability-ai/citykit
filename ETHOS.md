@@ -1,18 +1,18 @@
 # ETHOS — City Ops & Synthetic Scenario Factory
 
-> Inspired by the work of @steipete
-
 > **Vienna Rule:** If it can't be reproduced from a clean machine, it didn't happen.
 >
 > **Second Vienna Rule:** We ship the loop, not the slide deck.
 
-This project exists to make **robot operations in real cities** feel inevitable:
+This project exists to make **real city operations** feel inevitable — not as hype, but as something we can reproduce, audit, improve, and ship.
+
+It's **citizen‑centric by design**:
 
 - Cities get **clear, audit-friendly** infrastructure + curb rule plans.
-- Operators get **run cards, incident playbooks, and deployment options**.
-- Enthusiasts get **multi-perspective realism + datasets** they can train with.
+- Operators and city teams get **run cards, incident playbooks, and deployment options** (human-in-the-loop, assistive, and emerging automation when it helps).
+- Anyone who cares about better city life gets **reproducible artifacts** they can verify, remix, and build on.
 
-No hype. Only artifacts.
+No gatekeeping. No hype. Only receipts.
 
 ---
 
@@ -20,15 +20,25 @@ No hype. Only artifacts.
 
 **A single command produces a city-grade demo kit:**
 
-- multi-view video (robot, bike, van, pedestrian, bird's-eye)
+- multi-view video (service device, bike, van, pedestrian, bird's-eye)
 - trainable geometry (depth → point clouds + labels)
 - deployment plans (A/B/C) + KPIs
 - ops playbooks (incidents + hybrid handoffs)
 - a "hero cut" that makes people share it
 
-**One scenario = one shareable proof.**
+**One scenario = one shareable proof.** **One proof = one new collaborator.**
 
-**One proof = one new collaborator.**
+---
+
+## Why Now
+
+Cities are changing fast: demographics, curbside demand, delivery expectations, climate constraints, and new service models.
+
+The goal here is simple:
+
+**Deliver sustainable, reliable services faster — and prove it with artifacts.**
+
+Robotics can be part of that story, but it's never the headline. The headline is: **make streets and services work for people.**
 
 ---
 
@@ -36,9 +46,13 @@ No hype. Only artifacts.
 
 We build two things that compound:
 
-1) **Ops Control Room** - run ingest → QA → incident cards → playbooks → planning options
-2) **Scenario Factory** - open data (OSM + public layers) → sim → render passes → dataset pack
-   - **Veo is appearance. Sim is truth.**
+1) **Ops Control Room**
+- run ingest → QA → incident cards → playbooks → planning options
+
+2) **Scenario Factory**
+- open data (OSM + public layers) → sim → render passes → dataset pack
+
+**Veo is appearance. Sim is truth.**
 
 ---
 
@@ -68,7 +82,6 @@ We build two things that compound:
 ### 1) Artifacts > Opinions
 
 Every task must output concrete files:
-
 - `scenario.json`
 - `dataset_manifest.json`
 - `kpi_report.md`
@@ -127,7 +140,6 @@ A feature is done when:
 ## Tone & Communication
 
 We're Austrian about it:
-
 - direct, polite, minimal drama
 - careful with claims
 - always include the "receipt" (artifact link, command, metric)
@@ -138,7 +150,6 @@ We're Austrian about it:
 ## Open Data & Attribution
 
 We use open datasets responsibly:
-
 - OSM-derived layers are clearly attributed
 - licensing notes live in `ATTRIBUTION.md`
 - data provenance is tracked in `dataset_manifest.json`
@@ -147,8 +158,9 @@ We use open datasets responsibly:
 
 ## Safety & Ethics (Pragmatic)
 
-We support safer streets and better operations, without moral theatre. We prioritize:
+We support safer streets and better operations, without moral theatre.
 
+We prioritize:
 - auditability
 - clarity of limits
 - good defaults for privacy and redaction

@@ -1,4 +1,4 @@
-# WEEK 1 PLAN — Soft Launch (openclaw-city-demo-kit)
+# WEEK 1 PLAN — Soft Launch (CityKit)
 
 ## What we're trying to achieve (7 days)
 
@@ -8,7 +8,7 @@ By Day 7, a stranger can:
 2) understand the promise in <60s
 3) run `make demo`
 4) get `artifacts/<run_id>/city_demo_kit.zip`
-5) see three perspectives (robot POV + cyclist POV + bird's-eye), even if placeholder
+5) see three perspectives (front POV + cyclist POV + bird's-eye), even if placeholder
 6) know how to contribute (3 starter issues)
 
 ## Definition of Done (Soft Launch v0.1)
@@ -26,7 +26,6 @@ By Day 7, a stranger can:
 - Clear labeling conventions exist:
   - pcd_groundtruth/ (empty ok)
   - pcd_pseudo/ (empty ok)
-- "Unofficial / not affiliated" disclaimer is visible at top of README
 
 ---
 
@@ -34,11 +33,10 @@ By Day 7, a stranger can:
 
 ### Day 1 — Repo front door + day-1 demo
 
-- [ ] Add disclaimer block at top of README
 - [ ] Add ETHOS.md
 - [ ] Add ATTRIBUTION.md (OSM baseline)
 - [ ] Add REPRODUCE.md (stub ok)
-- [ ] Add TASKS.md (robot + intersection tasklists)
+- [ ] Add TASKS.md (service + intersection tasklists)
 - [ ] Add a minimal demo generator (`make demo`)
 
 Deliverable: repo looks legit and the demo can generate a kit artifact locally.
