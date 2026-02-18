@@ -19,8 +19,12 @@ This project ships artifacts first. No hype.
 **Prerequisites**
 
 - Python 3
-- `zip` (CLI)
-- (optional) `ffmpeg` for `.mp4` placeholders (otherwise writes `.txt` stubs)
+
+**Optional**
+
+- `zip` (CLI; faster packaging — Python zipfile fallback is used if missing)
+- `ffmpeg` for `.mp4` placeholders (otherwise writes `.txt` stubs)
+- Internet access when `MAP_MODE=osm` (Overpass API)
 
 **Commands**
 

@@ -9,13 +9,14 @@ ART_DIR := artifacts/$(RUN_ID)
 MAP_MODE ?= stub
 OVERPASS_ENDPOINT ?= https://overpass-api.de/api/interpreter
 
-.PHONY: help demo smoke inspect clean
+.PHONY: help demo smoke inspect compare clean
 
 help:
 	@echo "Targets:"
 	@echo " make demo RUN_ID=... MAP_MODE=stub|osm"
-	@echo " make inspect"
-	@echo " make smoke"
+	@echo " make inspect (inspect latest artifact)"
+	@echo " make compare (stub vs osm summary)"
+	@echo " make smoke (sanity check)"
 	@echo " make clean"
 	@echo ""
 	@echo "Vars:"
@@ -25,8 +26,9 @@ help:
 smoke:
 	@command -v python3 >/dev/null || (echo "Missing python3" && exit 1)
 	@echo "OK: python3 present"
-	@echo "Optional: zip for packaging"
+	@if command -v zip >/dev/null; then echo "OK: zip present (optional)"; else echo "NOTE: zip missing — Python zipfile fallback will be used"; fi
 	@echo "Optional: ffmpeg for placeholder mp4"
+	@echo "Optional: internet access when MAP_MODE=osm"
 
 demo:
 	@mkdir -p "$(ART_DIR)"
@@ -34,6 +36,9 @@ demo:
 
 inspect:
 	@./scripts/inspect_latest.sh
+
+compare:
+	@./scripts/compare.sh
 
 clean:
 	rm -rf artifacts/*

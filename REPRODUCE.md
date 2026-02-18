@@ -8,10 +8,11 @@ Goal: produce `city_demo_kit.zip` from a clean machine.
 
 **Required:**
 - `python3`
-- `zip` (CLI)
 
 **Optional:**
+- `zip` (CLI; faster packaging — Python zipfile fallback is used if missing)
 - `ffmpeg` (only used to generate placeholder `.mp4` files; otherwise the demo writes placeholder `.txt` files)
+- Internet access when `MAP_MODE=osm` (Overpass API fetch)
 
 ### Run
 
