@@ -1,0 +1,30 @@
+{
+  "schema_version": "0.1",
+  "name": "Example Delta (declarative)",
+  "ops": [
+    {
+      "op": "set_speed_limit",
+      "target": {
+        "selector": "highway=residential"
+      },
+      "value_kph": 20
+    },
+    {
+      "op": "add_curb_zone",
+      "where": {
+        "near": "corridor_centerline",
+        "radius_m": 40
+      },
+      "type": "loading",
+      "hours": "08:00-18:00"
+    },
+    {
+      "op": "add_geofence",
+      "where": {
+        "type": "corridor_aoi"
+      },
+      "allowed_hours": "06:00-22:00"
+    }
+  ],
+  "notes": "This is a spec-only delta. It does not claim simulated outcomes."
+}

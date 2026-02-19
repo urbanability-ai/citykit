@@ -1,0 +1,12 @@
+{
+  "schema_version": "0.1",
+  "name": "Berlin Corridor Example (bbox)",
+  "aoi": {
+    "type": "bbox",
+    "min_lon": 13.404954,
+    "min_lat": 52.520008,
+    "max_lon": 13.406000,
+    "max_lat": 52.521050
+  },
+  "notes": "Example AOI used for scenario spec documentation. v0.1 demo still uses inputs/zone.geojson for map.geojson."
+}

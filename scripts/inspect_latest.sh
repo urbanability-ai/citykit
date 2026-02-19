@@ -90,6 +90,28 @@ with zipfile.ZipFile(zip_path, "r") as z:
   print(f"✅ scenario.run_id: {run_id}")
   print(f"🗺️ scenario.map_mode: {map_mode}")
 
+  # Print AOI info if present
+  aoi = scenario.get("aoi")
+  if aoi:
+    aoi_type = aoi.get("type", "?")
+    if aoi_type == "bbox":
+      min_lon = aoi.get("min_lon", "?")
+      min_lat = aoi.get("min_lat", "?")
+      max_lon = aoi.get("max_lon", "?")
+      max_lat = aoi.get("max_lat", "?")
+      print(f"🧭 scenario.aoi: bbox ({min_lon}, {min_lat}) → ({max_lon}, {max_lat})")
+    elif aoi_type == "polygon":
+      coords_count = len(aoi.get("coordinates", [])) if aoi.get("coordinates") else 0
+      print(f"🧭 scenario.aoi: polygon ({coords_count} rings)")
+    else:
+      print(f"🧭 scenario.aoi: {aoi_type}")
+
+  # Print delta_present if set
+  delta_present = scenario.get("delta_present")
+  if delta_present is not None:
+    status = "✅ present" if delta_present else "❌ absent"
+    print(f"📋 scenario.delta_present: {status}")
+
   print("🎥 Cameras:")
   if cameras:
     for c in cameras:

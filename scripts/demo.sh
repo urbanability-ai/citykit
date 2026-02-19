@@ -144,12 +144,14 @@ export MAP_PROVENANCE
 
 python3 - <<'PY'
 import json, os, datetime
+from pathlib import Path
 
 run_id = os.environ.get("RUN_ID")
 map_mode_requested = os.environ.get("MAP_MODE_REQUESTED", "stub")
 map_mode_effective = os.environ.get("MAP_MODE_EFFECTIVE", "stub")
 map_provenance = os.environ.get("MAP_PROVENANCE", "")
 kit_dir = os.path.join(os.getcwd(), "artifacts", run_id, "city_demo_kit")
+root_dir = Path(os.getcwd())
 
 created_at = datetime.datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
 
@@ -173,6 +175,20 @@ scenario = {
     "appearance_layer": "video outputs (placeholders allowed in v0.x)"
   }
 }
+
+# Optional: enrich with AOI and delta_present if example files exist
+corridor_path = root_dir / "inputs" / "corridor.example.json"
+delta_path = root_dir / "inputs" / "scenario_delta.example.json"
+
+if corridor_path.exists():
+  try:
+    corridor_data = json.loads(corridor_path.read_text(encoding="utf-8"))
+    if "aoi" in corridor_data:
+      scenario["aoi"] = corridor_data["aoi"]
+  except Exception as e:
+    print(f"Warning: could not read corridor.example.json: {e}", file=__import__('sys').stderr)
+
+scenario["delta_present"] = delta_path.exists()
 
 manifest = {
   "schema_version": "0.2",
