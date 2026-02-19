@@ -1,6 +1,8 @@
 # READ THIS FIRST — What This Is + How to Run It
 
-This is an **unofficial**, **open-source** kit for generating reproducible city corridor scenarios. It's not affiliated with any government or major robotics platform; it's a toolkit for researchers, municipalities, and builders exploring city operations simulation.
+A minimal, reproducible city scenario demo kit for researchers, municipalities, and builders exploring city operations.
+
+This is an **open-source** toolkit. No external dependencies, no hype, no overpromises.
 
 ---
 

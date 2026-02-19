@@ -1,20 +1,33 @@
 # CityKit
 
-**Unofficial**, **open-source** kit for generating reproducible city corridor scenarios.
+A minimal, reproducible city scenario demo kit.
 
-Run `make demo` to produce a zipped scenario bundle with:
+This project packages:
 
-- map geometry (`map.geojson`)
-- scenario config (`scenario.json`)
-- dataset manifest (`dataset_manifest.json`)
-- multi-view placeholders (front POV, cyclist POV, bird's-eye)
-- reserved folders for labels and point clouds (`labels/`, `pcd_pseudo/`, `pcd_groundtruth/`)
+- a corridor definition (area of interest: bbox or polygon)
+- a declarative "delta" (what changes: speed limits, curb zones, geofences)
+- a structured artifact bundle (`city_demo_kit.zip`)
+- multi-perspective placeholders (robot POV, cyclist POV, bird's-eye)
 
-**This project ships artifacts first. No hype.** See [docs/READ_THIS_FIRST.md](docs/READ_THIS_FIRST.md) for what's real vs placeholder.
+Designed for clarity, reproducibility, and open data.
+
+See [docs/READ_THIS_FIRST.md](docs/READ_THIS_FIRST.md) for what's real vs placeholder.
 
 ---
 
-## Quickstart
+## Run
+
+```bash
+make smoke
+make demo
+make inspect
+```
+
+Output: `artifacts/<run_id>/city_demo_kit.zip`
+
+---
+
+## Setup
 
 **Prerequisites**
 
@@ -26,27 +39,6 @@ Run `make demo` to produce a zipped scenario bundle with:
 - `zip` (CLI; faster packaging — Python zipfile fallback is used if missing)
 - `ffmpeg` for `.mp4` placeholders (otherwise writes `.txt` stubs)
 - Internet access when `MAP_MODE=osm` (Overpass API)
-
-**Run It**
-
-```bash
-make demo    # Generate a kit
-make inspect # Validate + inspect output
-```
-
-**Output**
-
-```bash
-artifacts/<run_id>/city_demo_kit.zip
-```
-
-Full command list:
-```bash
-make smoke   # Sanity checks
-make demo    # Generate a new kit zip under artifacts/<run_id>/
-make inspect # Validate + print key fields from the latest kit
-make clean   # Remove artifacts/
-```
 
 ---
 
