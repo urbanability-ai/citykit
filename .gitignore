@@ -5,6 +5,10 @@
 artifacts/
 data/
 
+# local reference images (not committed)
+inputs/reference/
+inputs/reference/**
+
 # archives
 *.zip
 
