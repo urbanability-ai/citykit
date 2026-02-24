@@ -43,6 +43,37 @@ if [[ "${MAKE_ONLINE}" == "1" ]]; then
 fi
 
 # ----------------------------- 
+# Delta apply step (if online mode + baseline exists)
+# - Call delta_apply.py to transform baseline + delta → osm_modified.geojson
+# - Copy osm_modified + scenario_delta.json into kit
+# - Failure is non-fatal (continue with baseline only)
+# ----------------------------- 
+
+DELTA_APPLIED="no"
+
+if [[ "${OSM_ONLINE}" == "yes" ]] && [[ -f "${ROOT_DIR}/derived/osm_baseline.geojson" ]]; then
+  echo "📝 OSM_ONLINE: applying delta ops..."
+  if python3 "${ROOT_DIR}/scripts/delta_apply.py" \
+    --baseline "${ROOT_DIR}/derived/osm_baseline.geojson" \
+    --delta "${ROOT_DIR}/inputs/scenario_delta.example.json" \
+    --corridor "${ROOT_DIR}/inputs/corridor.example.json" \
+    --out "${ROOT_DIR}/derived/osm_modified.geojson"; then
+    
+    if [[ -f "${ROOT_DIR}/derived/osm_modified.geojson" ]]; then
+      mkdir -p "${KIT_DIR}/derived" "${KIT_DIR}/provenance"
+      cp "${ROOT_DIR}/derived/osm_modified.geojson" "${KIT_DIR}/derived/"
+      # Also copy scenario_delta.json for reference
+      cp "${ROOT_DIR}/inputs/scenario_delta.example.json" "${KIT_DIR}/scenario_delta.json"
+      DELTA_APPLIED="yes"
+    else
+      echo "⚠️ delta_apply.py succeeded but osm_modified.geojson not found." >&2
+    fi
+  else
+    echo "⚠️ Delta apply failed; continuing with baseline only." >&2
+  fi
+fi
+
+# ----------------------------- 
 # Map step (always include stub for compatibility)
 # ----------------------------- 
 
@@ -71,6 +102,7 @@ JSON
 
 export RUN_ID
 export OSM_ONLINE
+export DELTA_APPLIED
 export MAP_PROVENANCE
 
 python3 - <<'PY'
@@ -79,6 +111,7 @@ from pathlib import Path
 
 run_id = os.environ.get("RUN_ID")
 osm_online = os.environ.get("OSM_ONLINE", "no")
+delta_applied = os.environ.get("DELTA_APPLIED", "no")
 map_provenance = os.environ.get("MAP_PROVENANCE", "")
 kit_dir = os.path.join(os.getcwd(), "artifacts", run_id, "city_demo_kit")
 root_dir = Path(os.getcwd())
@@ -146,6 +179,17 @@ if osm_online == "yes":
     outputs["provenance"] = {
       "osm_query": "provenance/osm_query.json"
     }
+    
+    # Add modified if delta was applied
+    if delta_applied == "yes":
+      osm_modified_path = Path(kit_dir) / "derived" / "osm_modified.geojson"
+      if osm_modified_path.exists():
+        outputs["derived"]["osm_modified"] = "derived/osm_modified.geojson"
+    
+    # Add scenario_delta.json if present
+    scenario_delta_path = Path(kit_dir) / "scenario_delta.json"
+    if scenario_delta_path.exists():
+      outputs["scenario_delta"] = "scenario_delta.json"
 
 manifest = {
   "schema_version": "0.2",

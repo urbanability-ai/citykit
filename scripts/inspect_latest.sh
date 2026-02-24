@@ -124,6 +124,35 @@ with zipfile.ZipFile(zip_path, "r") as z:
   print(f"🗺️ map.geojson features: {feat_count}")
   print(f"🧍 actors.json actors: {actor_count}")
   print(f"🧩 actor types: {', '.join(actor_types) if actor_types else '(none)'}")
+  
+  # OSM baseline + modified reporting (optional, best-effort)
+  if "city_demo_kit/derived/osm_baseline.geojson" in names:
+    baseline_geo = json.loads(z.read("city_demo_kit/derived/osm_baseline.geojson"))
+    baseline_features = baseline_geo.get("features", [])
+    baseline_count = len(baseline_features) if isinstance(baseline_features, list) else 0
+    print(f"🌍 osm_baseline.geojson features: {baseline_count}")
+  
+  if "city_demo_kit/derived/osm_modified.geojson" in names:
+    modified_geo = json.loads(z.read("city_demo_kit/derived/osm_modified.geojson"))
+    modified_features = modified_geo.get("features", [])
+    modified_count = len(modified_features) if isinstance(modified_features, list) else 0
+    modified_meta = modified_geo
+    ops_count = modified_meta.get("delta_ops_count", 0)
+    applied_ops = modified_meta.get("applied_ops", [])
+    print(f"✏️ osm_modified.geojson features: {modified_count} (delta ops: {ops_count})")
+    if applied_ops:
+      op_names = [op.get("op", "?") for op in applied_ops]
+      print(f"   ops applied: {', '.join(op_names)}")
+  
+  # Scenario delta reporting (optional)
+  if "city_demo_kit/scenario_delta.json" in names:
+    delta_spec = json.loads(z.read("city_demo_kit/scenario_delta.json"))
+    delta_ops = delta_spec.get("ops", [])
+    delta_op_count = len(delta_ops) if isinstance(delta_ops, list) else 0
+    if delta_op_count > 0:
+      delta_op_names = [op.get("op", "?") for op in delta_ops if isinstance(op, dict)]
+      print(f"📝 scenario_delta.json ops: {delta_op_count}")
+      print(f"   ops defined: {', '.join(delta_op_names)}")
 
   print("📁 multiview contents:")
   mv = [n for n in names if n.startswith("city_demo_kit/multiview/") and not n.endswith("/")]
