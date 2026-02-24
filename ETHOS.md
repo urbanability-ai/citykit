@@ -48,13 +48,13 @@ Robotics can be part of that story, but it's never the headline. The headline is
 
 We build two things that compound:
 
-1) **Ops Control Room**
-- run ingest → QA → incident cards → playbooks → planning options
 
-2) **Scenario Factory**
+
+1) **Scenario Factory**
 - open data (OSM + public layers) → sim → render passes → dataset pack
 
-**Veo is appearance. Sim is truth.**
+2) **Ops Control Room**
+- run ingest → QA → incident cards → playbooks → planning options
 
 ---
 
@@ -69,7 +69,7 @@ We build two things that compound:
 - "What happened?" in 60 seconds
 - "What to do next?" with a checklist
 
-### ✅ Community magnetism
+### ✅ Community relevance
 - Visual wow that stays honest
 - Easy to try, easy to remix, easy to contribute
 
