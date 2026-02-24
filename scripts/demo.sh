@@ -2,7 +2,7 @@
 set -euo pipefail
 
 RUN_ID="${RUN_ID:-$(date -u +"%Y-%m-%dT%H%M%SZ")}"
-MAP_MODE="${MAP_MODE:-stub}"
+MAKE_ONLINE="${MAKE_ONLINE:-0}"
 OVERPASS_ENDPOINT="${OVERPASS_ENDPOINT:-https://overpass-api.de/api/interpreter}"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -10,111 +10,43 @@ OUT_DIR="${ROOT_DIR}/artifacts/${RUN_ID}"
 KIT_DIR="${OUT_DIR}/city_demo_kit"
 ZIP_PATH="${OUT_DIR}/city_demo_kit.zip"
 
-mkdir -p "${KIT_DIR}"/{multiview,pcd_groundtruth,pcd_pseudo,labels}
+mkdir -p "${KIT_DIR}"/{multiview,pcd_groundtruth,pcd_pseudo,labels,derived,provenance}
 
 ZONE_FILE="${ROOT_DIR}/inputs/zone.geojson"
 
+OSM_ONLINE="no"
 MAP_PROVENANCE="Zone polygon stub (default offline mode)."
-MAP_MODE_EFFECTIVE="stub"
 
 # ----------------------------- 
-# Map step
-# - stub: copy polygon as map.geojson
-# - osm: fetch highway ways in bbox; fallback to stub on failure
+# OSM Fetch step (online optional)
+# - MAKE_ONLINE=1: call osm_fetch.py
+# - Success: copy derived/osm_baseline.geojson + provenance/osm_query.json → kit
+# - Failure: continue with stub
 # ----------------------------- 
 
-if [[ "${MAP_MODE}" == "osm" ]]; then
-  echo "🌍 MAP_MODE=osm: attempting Overpass fetch → map.geojson"
-  if python3 - <<PY
-import json, sys
-from urllib import request, parse
-from pathlib import Path
-
-zone_path = Path("${ZONE_FILE}")
-endpoint = "${OVERPASS_ENDPOINT}"
-out_path = Path("${KIT_DIR}") / "map.geojson"
-
-zone = json.loads(zone_path.read_text(encoding="utf-8"))
-
-try:
-  coords = zone["features"][0]["geometry"]["coordinates"][0]
-except Exception:
-  print("No polygon coords found in inputs/zone.geojson", file=sys.stderr)
-  sys.exit(2)
-
-lons = [c[0] for c in coords]
-lats = [c[1] for c in coords]
-west, east = min(lons), max(lons)
-south, north = min(lats), max(lats)
-
-q = f"""
-[out:json][timeout:25];
-(
-  way["highway"]({south},{west},{north},{east});
-);
-(._;>;);
-out body;
-"""
-
-data = parse.urlencode({"data": q}).encode("utf-8")
-req = request.Request(endpoint, data=data, headers={
-  "User-Agent": "urbanability-citykit/0.2 (demo generator)"
-})
-
-with request.urlopen(req, timeout=35) as resp:
-  raw = resp.read().decode("utf-8")
-  js = json.loads(raw)
-
-elements = js.get("elements", [])
-nodes = {}
-ways = []
-
-for el in elements:
-  if el.get("type") == "node":
-    nodes[el["id"]] = (el["lon"], el["lat"])
-  elif el.get("type") == "way":
-    ways.append(el)
-
-features = []
-for w in ways:
-  nds = w.get("nodes", [])
-  coords = [nodes[n] for n in nds if n in nodes]
-  if len(coords) < 2:
-    continue
-  tags = w.get("tags", {})
-  features.append({
-    "type": "Feature",
-    "properties": {
-      "osm_id": w.get("id"),
-      "highway": tags.get("highway"),
-      "name": tags.get("name"),
-      "surface": tags.get("surface"),
-      "oneway": tags.get("oneway")
-    },
-    "geometry": {"type": "LineString", "coordinates": coords}
-  })
-
-out_path.write_text(json.dumps({"type":"FeatureCollection","features":features}, indent=2), encoding="utf-8")
-
-# Consider success only if we have at least 1 LineString feature
-if len(features) < 1:
-  sys.exit(3)
-
-print(f"Wrote OSM map features: {len(features)}")
-PY
-  then
-    MAP_PROVENANCE="OSM highways via Overpass (bbox from inputs/zone.geojson)."
-    MAP_MODE_EFFECTIVE="osm"
+if [[ "${MAKE_ONLINE}" == "1" ]]; then
+  echo "🌍 MAKE_ONLINE=1: attempting OSM fetch via scripts/osm_fetch.py"
+  if python3 "${ROOT_DIR}/scripts/osm_fetch.py"; then
+    # osm_fetch.py succeeded; copy outputs into kit
+    if [[ -f "${ROOT_DIR}/derived/osm_baseline.geojson" ]]; then
+      mkdir -p "${KIT_DIR}/derived" "${KIT_DIR}/provenance"
+      cp "${ROOT_DIR}/derived/osm_baseline.geojson" "${KIT_DIR}/derived/"
+      cp "${ROOT_DIR}/provenance/osm_query.json" "${KIT_DIR}/provenance/"
+      OSM_ONLINE="yes"
+      MAP_PROVENANCE="OSM highways + footways + cycleways via Overpass API (bbox from inputs/corridor.example.json)."
+    else
+      echo "⚠️ osm_fetch.py succeeded but derived/osm_baseline.geojson not found." >&2
+    fi
   else
-    echo "⚠️ Overpass fetch failed or returned no features; falling back to stub polygon." >&2
-    cp "${ZONE_FILE}" "${KIT_DIR}/map.geojson"
-    MAP_PROVENANCE="Zone polygon stub (OSM requested but fetch failed; fallback applied)."
-    MAP_MODE_EFFECTIVE="stub"
+    echo "⚠️ OSM fetch failed; continuing with stub polygon fallback." >&2
   fi
-else
-  cp "${ZONE_FILE}" "${KIT_DIR}/map.geojson"
-  MAP_MODE_EFFECTIVE="stub"
 fi
+
+# ----------------------------- 
+# Map step (always include stub for compatibility)
+# ----------------------------- 
+
+cp "${ZONE_FILE}" "${KIT_DIR}/map.geojson"
 
 # ----------------------------- 
 # Actors (stub)
@@ -134,12 +66,11 @@ JSON
 
 # ----------------------------- 
 # Scenario + Manifest (strict JSON)
-# IMPORTANT: record MAP_MODE_EFFECTIVE (truthful)
+# IMPORTANT: record OSM_ONLINE status (truthful)
 # ----------------------------- 
 
 export RUN_ID
-export MAP_MODE_REQUESTED="${MAP_MODE}"
-export MAP_MODE_EFFECTIVE
+export OSM_ONLINE
 export MAP_PROVENANCE
 
 python3 - <<'PY'
@@ -147,8 +78,7 @@ import json, os, datetime
 from pathlib import Path
 
 run_id = os.environ.get("RUN_ID")
-map_mode_requested = os.environ.get("MAP_MODE_REQUESTED", "stub")
-map_mode_effective = os.environ.get("MAP_MODE_EFFECTIVE", "stub")
+osm_online = os.environ.get("OSM_ONLINE", "no")
 map_provenance = os.environ.get("MAP_PROVENANCE", "")
 kit_dir = os.path.join(os.getcwd(), "artifacts", run_id, "city_demo_kit")
 root_dir = Path(os.getcwd())
@@ -161,8 +91,7 @@ scenario = {
   "zone": {
     "source": "inputs/zone.geojson",
     "map_artifact": "map.geojson",
-    "map_mode_requested": map_mode_requested,
-    "map_mode": map_mode_effective
+    "osm_baseline_enabled": osm_online == "yes"
   },
   "actors_artifact": "actors.json",
   "cameras": [
@@ -190,6 +119,34 @@ if corridor_path.exists():
 
 scenario["delta_present"] = delta_path.exists()
 
+# Build outputs list (including OSM files if present)
+outputs = {
+  "scenario": "scenario.json",
+  "manifest": "dataset_manifest.json",
+  "map": "map.geojson",
+  "actors": "actors.json",
+  "multiview": [
+    "multiview/robot_front.mp4",
+    "multiview/cyclist_pov.mp4",
+    "multiview/birds_eye.mp4"
+  ],
+  "labels": "labels/ (empty in v0.x)",
+  "pcd_groundtruth": "pcd_groundtruth/ (empty in v0.x)",
+  "pcd_pseudo": "pcd_pseudo/ (empty in v0.x)"
+}
+
+# Add OSM outputs if online mode succeeded
+if osm_online == "yes":
+  osm_baseline_path = Path(kit_dir) / "derived" / "osm_baseline.geojson"
+  osm_query_path = Path(kit_dir) / "provenance" / "osm_query.json"
+  if osm_baseline_path.exists() and osm_query_path.exists():
+    outputs["derived"] = {
+      "osm_baseline": "derived/osm_baseline.geojson"
+    }
+    outputs["provenance"] = {
+      "osm_query": "provenance/osm_query.json"
+    }
+
 manifest = {
   "schema_version": "0.2",
   "dataset_id": f"urbanability-citykit::{run_id}",
@@ -198,23 +155,10 @@ manifest = {
     "map": map_provenance,
     "attribution": "See ATTRIBUTION.md in repo root."
   },
-  "outputs": {
-    "scenario": "scenario.json",
-    "manifest": "dataset_manifest.json",
-    "map": "map.geojson",
-    "actors": "actors.json",
-    "multiview": [
-      "multiview/robot_front.mp4",
-      "multiview/cyclist_pov.mp4",
-      "multiview/birds_eye.mp4"
-    ],
-    "labels": "labels/ (empty in v0.x)",
-    "pcd_groundtruth": "pcd_groundtruth/ (empty in v0.x)",
-    "pcd_pseudo": "pcd_pseudo/ (empty in v0.x)"
-  },
+  "outputs": outputs,
   "notes": [
-    "Default MAP_MODE=stub is offline and reproducible.",
-    "MAP_MODE=osm performs an optional network fetch; fallback to stub is explicit in scenario + provenance.",
+    "Default (MAKE_ONLINE=0) is offline and reproducible with stub polygon.",
+    "MAKE_ONLINE=1 fetches real OSM baseline via Overpass API; fallback to stub is automatic on failure.",
     "Training-grade ground truth is not part of v0.2.",
     "Ground-truth geometry and metrics come from simulator depth/LiDAR later."
   ]
@@ -313,5 +257,5 @@ PY
 fi
 
 echo "✅ Built: ${ZIP_PATH}"
-echo " MAP_MODE requested: ${MAP_MODE}"
-echo " MAP_MODE effective: ${MAP_MODE_EFFECTIVE}"
+echo " MAKE_ONLINE: ${MAKE_ONLINE}"
+echo " OSM_ONLINE: ${OSM_ONLINE}"

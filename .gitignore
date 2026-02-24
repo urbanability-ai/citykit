@@ -4,6 +4,8 @@
 # generated outputs
 artifacts/
 data/
+derived/
+provenance/
 
 # local reference images (not committed)
 inputs/reference/
