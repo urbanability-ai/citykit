@@ -153,6 +153,12 @@ with zipfile.ZipFile(zip_path, "r") as z:
       delta_op_names = [op.get("op", "?") for op in delta_ops if isinstance(op, dict)]
       print(f"📝 scenario_delta.json ops: {delta_op_count}")
       print(f"   ops defined: {', '.join(delta_op_names)}")
+  
+  # Viewer reporting (optional)
+  if "city_demo_kit/viz/overview.html" in names:
+    print(f"🗺️ viewer: present")
+  else:
+    print(f"🗺️ viewer: (absent)")
 
   print("📁 multiview contents:")
   mv = [n for n in names if n.startswith("city_demo_kit/multiview/") and not n.endswith("/")]

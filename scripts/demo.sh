@@ -74,6 +74,18 @@ if [[ "${OSM_ONLINE}" == "yes" ]] && [[ -f "${ROOT_DIR}/derived/osm_baseline.geo
 fi
 
 # ----------------------------- 
+# Viewer step (only if OSM baseline/modified exist)
+# - Writes viz/overview.html that loads local GeoJSON files
+# - Works offline (no server required)
+# ----------------------------- 
+
+if [[ -d "${KIT_DIR}/derived" ]] && ls "${KIT_DIR}/derived/"osm_*.geojson >/dev/null 2>&1; then
+  echo "🎨 Building viewer..."
+  mkdir -p "${KIT_DIR}/viz"
+  python3 "${ROOT_DIR}/scripts/build_viz.py" --kit "${KIT_DIR}" --run-id "${RUN_ID}" 2>&1 || echo "⚠️ build_viz failed; continuing" >&2
+fi
+
+# ----------------------------- 
 # Map step (always include stub for compatibility)
 # ----------------------------- 
 
@@ -190,6 +202,11 @@ if osm_online == "yes":
     scenario_delta_path = Path(kit_dir) / "scenario_delta.json"
     if scenario_delta_path.exists():
       outputs["scenario_delta"] = "scenario_delta.json"
+
+# Add viewer if present
+viz_path = Path(kit_dir) / "viz" / "overview.html"
+if viz_path.exists():
+  outputs["viz"] = "viz/overview.html"
 
 manifest = {
   "schema_version": "0.2",
