@@ -17,13 +17,26 @@ See [docs/READ_THIS_FIRST.md](docs/READ_THIS_FIRST.md) for what's real vs placeh
 
 ## Run
 
+**Offline mode (default):**
 ```bash
 make smoke
-make demo
+make demo        # Generates kit with stub map
+make inspect
+```
+
+**Online mode (fetch real OSM + generate viewer):**
+```bash
+make clean
+MAKE_ONLINE=1 make demo    # Fetches OSM baseline, applies delta ops, builds interactive viewer
 make inspect
 ```
 
 Output: `artifacts/<run_id>/city_demo_kit.zip`
+
+**v0.2.3 adds:**
+- Optional OSM ingestion via Overpass API (`MAKE_ONLINE=1`)
+- Minimal delta engine (speed limits, geofences, curb zones)
+- Local Leaflet viewer (`viz/overview.html`) — layer toggles, no server needed
 
 ---
 
