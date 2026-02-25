@@ -156,7 +156,13 @@ with zipfile.ZipFile(zip_path, "r") as z:
   
   # Viewer reporting (optional)
   if "city_demo_kit/viz/overview.html" in names:
-    print(f"🗺️ viewer: present")
+    embedded = "unknown"
+    try:
+      html = z.read("city_demo_kit/viz/overview.html").decode("utf-8", errors="ignore")
+      embedded = "true" if "__BASELINE_GEOJSON" in html else "false"
+    except Exception:
+      embedded = "unknown"
+    print(f"🗺️ viewer: present (embedded={embedded})")
   else:
     print(f"🗺️ viewer: (absent)")
 

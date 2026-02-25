@@ -3,7 +3,9 @@
 scripts/build_viz.py — Stdlib-only Leaflet viewer builder
 
 Writes a single-file HTML viewer into <KIT_DIR>/viz/overview.html
-Loads GeoJSON from relative paths (no server required).
+Modes:
+- default: loads GeoJSON via fetch("../derived/osm_*.geojson")
+- --embed: embeds GeoJSON inline (file:// compatible)
 """
 
 import argparse
@@ -69,6 +71,7 @@ HTML_TEMPLATE = """<!doctype html>
       font-size: 12px;
       color: #a00;
       margin-top: 8px;
+      white-space: pre-wrap;
     }}
     a {{
       color: #0a58ca;
@@ -83,7 +86,7 @@ HTML_TEMPLATE = """<!doctype html>
     <div class="meta">
       run_id: <code>{run_id}</code><br/>
       generated: {generated_at}<br/>
-      <span style="color:#666">Open locally. No server required.</span>
+      viewer mode: <code>{viewer_mode}</code>
     </div>
     <label><input type="checkbox" id="toggleBaseline" checked> Baseline (OSM)</label>
     <label><input type="checkbox" id="toggleModified" checked> Modified (delta applied)</label>
@@ -101,8 +104,15 @@ HTML_TEMPLATE = """<!doctype html>
   </div>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" ></script>
   <script>
+    // Marker strings used by inspect tooling:
+    // __BASELINE_GEOJSON, __MODIFIED_GEOJSON, __VIEWER_MODE
+    const VIEWER_MODE = "{viewer_mode}";
     const BASELINE_URL = "../derived/osm_baseline.geojson";
     const MODIFIED_URL = "../derived/osm_modified.geojson";
+
+    // Embedded data (present when VIEWER_MODE === "embedded")
+    window.__BASELINE_GEOJSON = {baseline_embedded};
+    window.__MODIFIED_GEOJSON = {modified_embedded};
 
     const map = L.map("map", {{ zoomControl: true }});
 
@@ -164,6 +174,10 @@ HTML_TEMPLATE = """<!doctype html>
       return L.geoJSON(data, {{ style: styleFn, onEachFeature }});
     }}
 
+    function loadEmbedded(data, styleFn) {{
+      return L.geoJSON(data, {{ style: styleFn, onEachFeature }});
+    }}
+
     function fitToLayers(layers) {{
       const group = L.featureGroup(layers.filter(Boolean));
       if (group.getLayers().length) {{
@@ -173,49 +187,75 @@ HTML_TEMPLATE = """<!doctype html>
       }}
     }}
 
+    function splitOverlaysFromModified(layer) {{
+      const overlays = [];
+      const main = [];
+      layer.eachLayer(l => {{
+        const f = l.feature || {{}};
+        const p = f.properties || {{}};
+        if (p.feature_type) overlays.push(f);
+        else main.push(f);
+      }});
+      return {{ overlays, main }};
+    }}
+
     async function init() {{
       try {{
-        baselineLayer = await loadGeoJSON(BASELINE_URL, styleBaseline);
-        baselineLayer.addTo(map);
-      }} catch (e) {{
-        warn(`Baseline not available: ${{e.message}}`);
-      }}
+        if (VIEWER_MODE === "embedded") {{
+          if (window.__BASELINE_GEOJSON) {{
+            baselineLayer = loadEmbedded(window.__BASELINE_GEOJSON, styleBaseline).addTo(map);
+          }} else {{
+            warn("Baseline not embedded.");
+          }}
 
-      try {{
-        modifiedLayer = await loadGeoJSON(MODIFIED_URL, styleModified);
-
-        // Split overlays out of modified (feature_type present)
-        const overlays = [];
-        const main = [];
-
-        modifiedLayer.eachLayer(l => {{
-          const f = l.feature || {{}};
-          const p = f.properties || {{}};
-          if (p.feature_type) overlays.push(f);
-          else main.push(f);
-        }});
-
-        // Rebuild: modified ways layer (no overlays)
-        if (main.length) {{
-          modifiedLayer = L.geoJSON({{type:"FeatureCollection", features: main}}, {{
-            style: styleModified,
-            onEachFeature
-          }}).addTo(map);
+          if (window.__MODIFIED_GEOJSON) {{
+            const tmp = loadEmbedded(window.__MODIFIED_GEOJSON, styleModified);
+            const parts = splitOverlaysFromModified(tmp);
+            if (parts.main.length) {{
+              modifiedLayer = L.geoJSON({{type:"FeatureCollection", features: parts.main}}, {{
+                style: styleModified,
+                onEachFeature
+              }}).addTo(map);
+            }}
+            if (parts.overlays.length) {{
+              overlayLayer = L.geoJSON({{type:"FeatureCollection", features: parts.overlays}}, {{
+                style: styleOverlay,
+                onEachFeature
+              }}).addTo(map);
+            }}
+          }} else {{
+            warn("Modified not embedded.");
+          }}
         }} else {{
-          modifiedLayer = null;
-        }}
+          // fetch mode (older behavior)
+          try {{
+            baselineLayer = await loadGeoJSON(BASELINE_URL, styleBaseline);
+            baselineLayer.addTo(map);
+          }} catch (e) {{
+            warn(`Baseline not available: ${{e.message}}`);
+          }}
 
-        // Overlays layer
-        if (overlays.length) {{
-          overlayLayer = L.geoJSON({{type:"FeatureCollection", features: overlays}}, {{
-            style: styleOverlay,
-            onEachFeature
-          }}).addTo(map);
-        }} else {{
-          overlayLayer = null;
+          try {{
+            let tmp = await loadGeoJSON(MODIFIED_URL, styleModified);
+            const parts = splitOverlaysFromModified(tmp);
+            if (parts.main.length) {{
+              modifiedLayer = L.geoJSON({{type:"FeatureCollection", features: parts.main}}, {{
+                style: styleModified,
+                onEachFeature
+              }}).addTo(map);
+            }}
+            if (parts.overlays.length) {{
+              overlayLayer = L.geoJSON({{type:"FeatureCollection", features: parts.overlays}}, {{
+                style: styleOverlay,
+                onEachFeature
+              }}).addTo(map);
+            }}
+          }} catch (e) {{
+            warn(`Modified not available: ${{e.message}}`);
+          }}
         }}
       }} catch (e) {{
-        warn(`Modified not available: ${{e.message}}`);
+        warn(`Viewer init error: ${{e.message}}`);
       }}
 
       fitToLayers([baselineLayer, modifiedLayer, overlayLayer]);
@@ -250,10 +290,18 @@ HTML_TEMPLATE = """<!doctype html>
 </html>"""
 
 
+def _read_geojson_if_exists(path: str):
+    if not os.path.exists(path):
+        return None
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
 def main():
     ap = argparse.ArgumentParser(description="Build Leaflet viewer for demo kit")
     ap.add_argument("--kit", required=True, help="Path to city_demo_kit directory (inside artifacts/run_id)")
     ap.add_argument("--run-id", default="", help="Optional run_id for display")
+    ap.add_argument("--embed", action="store_true", help="Embed GeoJSON inline (file:// compatible)")
     args = ap.parse_args()
 
     kit_dir = args.kit
@@ -276,13 +324,31 @@ def main():
 
     generated_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
-    html = HTML_TEMPLATE.format(run_id=run_id, generated_at=generated_at)
+    viewer_mode = "embedded" if args.embed else "fetch"
+    baseline_embedded = "null"
+    modified_embedded = "null"
+
+    if args.embed:
+        baseline_path = os.path.join(kit_dir, "derived", "osm_baseline.geojson")
+        modified_path = os.path.join(kit_dir, "derived", "osm_modified.geojson")
+        baseline = _read_geojson_if_exists(baseline_path)
+        modified = _read_geojson_if_exists(modified_path)
+        baseline_embedded = json.dumps(baseline) if baseline is not None else "null"
+        modified_embedded = json.dumps(modified) if modified is not None else "null"
+
+    html = HTML_TEMPLATE.format(
+        run_id=run_id,
+        generated_at=generated_at,
+        viewer_mode=viewer_mode,
+        baseline_embedded=baseline_embedded,
+        modified_embedded=modified_embedded,
+    )
 
     out_path = os.path.join(kit_dir, "viz", "overview.html")
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(html)
 
-    print(f"✅ build_viz: wrote viewer to {out_path}")
+    print(f"✅ build_viz: wrote viewer to {out_path} (mode={viewer_mode})")
 
 
 if __name__ == "__main__":

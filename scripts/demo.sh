@@ -82,7 +82,7 @@ fi
 if [[ -d "${KIT_DIR}/derived" ]] && ls "${KIT_DIR}/derived/"osm_*.geojson >/dev/null 2>&1; then
   echo "🎨 Building viewer..."
   mkdir -p "${KIT_DIR}/viz"
-  python3 "${ROOT_DIR}/scripts/build_viz.py" --kit "${KIT_DIR}" --run-id "${RUN_ID}" 2>&1 || echo "⚠️ build_viz failed; continuing" >&2
+  python3 "${ROOT_DIR}/scripts/build_viz.py" --kit "${KIT_DIR}" --run-id "${RUN_ID}" --embed 2>&1 || echo "⚠️ build_viz failed; continuing" >&2
 fi
 
 # ----------------------------- 
@@ -205,8 +205,10 @@ if osm_online == "yes":
 
 # Add viewer if present
 viz_path = Path(kit_dir) / "viz" / "overview.html"
+viewer_embedded = False
 if viz_path.exists():
   outputs["viz"] = "viz/overview.html"
+  viewer_embedded = True
 
 manifest = {
   "schema_version": "0.2",
@@ -224,6 +226,9 @@ manifest = {
     "Ground-truth geometry and metrics come from simulator depth/LiDAR later."
   ]
 }
+
+if viewer_embedded:
+  manifest["viewer_embedded_geojson"] = True
 
 with open(os.path.join(kit_dir, "scenario.json"), "w", encoding="utf-8") as f:
   json.dump(scenario, f, indent=2)
