@@ -82,7 +82,7 @@ fi
 if [[ -d "${KIT_DIR}/derived" ]] && ls "${KIT_DIR}/derived/"osm_*.geojson >/dev/null 2>&1; then
   echo "🎨 Building viewer..."
   mkdir -p "${KIT_DIR}/viz"
-  python3 "${ROOT_DIR}/scripts/build_viz.py" --kit "${KIT_DIR}" --run-id "${RUN_ID}" --embed 2>&1 || echo "⚠️ build_viz failed; continuing" >&2
+  python3 "${ROOT_DIR}/scripts/build_viz.py" --kit "${KIT_DIR}" --embed 2>&1 || echo "build_viz failed; continuing" >&2
 fi
 
 # ----------------------------- 
